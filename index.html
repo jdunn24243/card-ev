@@ -49,7 +49,7 @@ body{display:flex;flex-direction:column;font-family:var(--display);}
 .screen.hidden{display:none;}
 
 /* tab bar */
-.tabbar{position:relative;flex-shrink:0;display:flex;border-top:1px solid var(--border);background:var(--bg);padding-bottom:env(safe-area-inset-bottom,0px);}
+.tabbar{position:relative;flex-shrink:0;display:flex;border-top:1px solid var(--border);background:var(--bg);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px);}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:var(--text3);}
 .tab-btn.active{color:var(--accent);}
 .tab-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
