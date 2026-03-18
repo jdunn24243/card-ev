@@ -7,9 +7,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Card EV">
 <meta name="theme-color" content="#0f0f0f">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="/card-ev/manifest.json">
 <title>Card EV</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleanapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -552,6 +552,6 @@ function renderHistory() {
 
 calc();
 </script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/card-ev/sw.js");}</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/card-ev/sw.js", {scope: "/card-ev/"});}</script>
 </body>
 </html>
