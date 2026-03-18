@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Card EV">
+<meta name="theme-color" content="#0f0f0f">
+<link rel="manifest" href="manifest.json">
+<title>Card EV</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0f0f0f;
+  --surface:#181818;
+  --surface2:#222;
+  --border:#2a2a2a;
+  --border2:#333;
+  --text:#f0ede8;
+  --text2:#888880;
+  --text3:#555550;
+  --accent:#c8f060;
+  --accent-dim:#8aaa30;
+  --accent-bg:#131a05;
+  --accent-border:#3b6d11;
+  --red:#ff5a5a;
+  --red-bg:#1f1010;
+  --red-border:#7a1010;
+  --yellow:#f5c842;
+  --yellow-bg:#1e1a0a;
+  --yellow-border:#7a6010;
+  --mono:'DM Mono',monospace;
+  --display:'Syne',sans-serif;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);}
+body{display:flex;flex-direction:column;font-family:var(--display);}
+
+/* layout */
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;width:100%;}
+.header{padding:env(safe-area-inset-top,16px) 20px 12px;padding-top:calc(env(safe-area-inset-top,0px) + 16px);border-bottom:1px solid var(--border);flex-shrink:0;}
+.header-top{display:flex;align-items:baseline;justify-content:space-between;}
+.app-title{font-size:22px;font-weight:700;letter-spacing:-0.02em;}
+.app-title span{color:var(--accent);}
+.app-subtitle{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:2px;}
+.screens{flex:1;overflow:hidden;position:relative;}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 80px);}
+.screen.hidden{display:none;}
+
+/* tab bar */
+.tabbar{position:relative;flex-shrink:0;display:flex;border-top:1px solid var(--border);background:var(--bg);padding-bottom:env(safe-area-inset-bottom,0px);}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:var(--text3);}
+.tab-btn.active{color:var(--accent);}
+.tab-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.tab-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;}
+
+/* sections */
+.section{padding:12px 16px 0;}
+.section-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;padding-left:2px;}
+.input-group{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.input-row{display:flex;align-items:center;justify-content:space-between;padding:0 16px;min-height:54px;border-bottom:1px solid var(--border);gap:12px;}
+.input-row:last-child{border-bottom:none;}
+.input-row-label{font-size:14px;color:var(--text2);font-family:var(--mono);flex:1;}
+.input-row-right{display:flex;align-items:center;gap:6px;}
+.unit{font-family:var(--mono);font-size:13px;color:var(--text3);}
+input[type="text"],input[type="number"]{
+  background:transparent;border:none;outline:none;
+  font-family:var(--mono);font-size:16px;font-weight:500;color:var(--text);
+  width:90px;text-align:right;height:54px;
+  -moz-appearance:textfield;
+}
+input[type="text"]{width:100%;}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type="number"]:focus{color:var(--accent);}
+
+/* card name */
+.card-name-wrap{margin:14px 16px 0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;}
+.card-name-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.card-name-input{background:transparent;border:none;outline:none;font-family:var(--display);font-size:16px;font-weight:500;color:var(--text);width:100%;padding:0;}
+.card-name-input::placeholder{color:var(--text3);}
+
+/* slider */
+.slider-section{padding:12px 16px 0;}
+.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.slider-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);}
+.slider-value{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--accent);}
+input[type="range"]{
+  -webkit-appearance:none;width:100%;height:6px;
+  background:var(--border2);border-radius:3px;outline:none;cursor:pointer;
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:28px;height:28px;border-radius:50%;
+  background:var(--accent);cursor:pointer;border:3px solid var(--bg);
+}
+input[type="range"]::-moz-range-thumb{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--accent);cursor:pointer;border:3px solid var(--bg);
+}
+.slider-ticks{display:flex;justify-content:space-between;margin-top:5px;}
+.slider-tick{font-family:var(--mono);font-size:10px;color:var(--text3);}
+
+/* metrics */
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px 0;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.metric-label{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.metric-value{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text);}
+.metric-value.green{color:var(--accent);}
+.metric-value.red{color:var(--red);}
+.metric-value.yellow{color:var(--yellow);}
+
+/* verdict */
+.verdict{margin:10px 16px 0;border-radius:14px;border:1px solid;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:background 0.2s,border-color 0.2s;}
+.verdict.green{background:var(--accent-bg);border-color:var(--accent-border);}
+.verdict.yellow{background:var(--yellow-bg);border-color:var(--yellow-border);}
+.verdict.red{background:var(--red-bg);border-color:var(--red-border);}
+.verdict-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.verdict.green .verdict-dot{background:var(--accent);}
+.verdict.yellow .verdict-dot{background:var(--yellow);}
+.verdict.red .verdict-dot{background:var(--red);}
+.verdict-title{font-size:16px;font-weight:700;letter-spacing:-0.01em;}
+.verdict.green .verdict-title{color:var(--accent);}
+.verdict.yellow .verdict-title{color:var(--yellow);}
+.verdict.red .verdict-title{color:var(--red);}
+.verdict-detail{font-family:var(--mono);font-size:11px;margin-top:3px;line-height:1.5;opacity:0.85;}
+.verdict.green .verdict-detail{color:var(--accent);}
+.verdict.yellow .verdict-detail{color:var(--yellow);}
+.verdict.red .verdict-detail{color:var(--red);}
+
+/* save button */
+.save-btn{margin:12px 16px 0;width:calc(100% - 32px);background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:16px;font-family:var(--display);font-size:15px;font-weight:600;color:var(--text2);cursor:pointer;transition:background 0.15s,color 0.15s,border-color 0.15s;}
+.save-btn:active{transform:scale(0.98);}
+.save-btn.ready{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent);}
+
+/* history */
+.history-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px;}
+.history-title{font-size:15px;font-weight:600;}
+.history-clear{font-family:var(--mono);font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 0;}
+.empty-state{padding:48px 16px;text-align:center;}
+.empty-icon{width:48px;height:48px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;}
+.empty-title{font-size:15px;font-weight:500;color:var(--text2);margin-bottom:6px;}
+.empty-sub{font-family:var(--mono);font-size:12px;color:var(--text3);line-height:1.6;}
+.history-list{padding:0 16px;}
+.history-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;overflow:hidden;cursor:pointer;transition:border-color 0.15s;}
+.history-item:active{opacity:0.85;}
+.history-item-top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;}
+.history-item-left{flex:1;min-width:0;}
+.history-item-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.history-item-meta{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.history-item-right{text-align:right;flex-shrink:0;margin-left:12px;}
+.history-profit{font-family:var(--mono);font-size:16px;font-weight:500;}
+.history-profit.pos{color:var(--accent);}
+.history-profit.neg{color:var(--red);}
+.history-profit.neutral{color:var(--yellow);}
+.history-verdict-badge{font-family:var(--mono);font-size:10px;margin-top:3px;}
+.history-verdict-badge.send{color:var(--accent-dim);}
+.history-verdict-badge.pass{color:#aa4040;}
+.history-verdict-badge.maybe{color:#aa8a20;}
+
+/* expanded history */
+.history-expanded{display:none;border-top:1px solid var(--border);padding:12px 16px 14px;background:var(--surface2);}
+.history-expanded.open{display:block;}
+.expanded-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:12px;}
+.expanded-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.expanded-stat-label{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+.expanded-stat-value{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);}
+.load-btn{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:13px;font-family:var(--display);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.15s;}
+.load-btn:active{transform:scale(0.98);}
+.load-btn.accent{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent);}
+
+/* formula */
+.formula-bar{margin:10px 16px 0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;}
+.formula-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.formula-text{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.9;}
+.formula-text .hi{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-top">
+      <div class="app-title">Card <span>EV</span></div>
+    </div>
+    <div class="app-subtitle">Grading expected value calculator</div>
+  </div>
+
+  <div class="screens">
+
+    <!-- CALCULATOR SCREEN -->
+    <div class="screen" id="screen-calc">
+
+      <div class="card-name-wrap">
+        <div class="card-name-label">Card name</div>
+        <input class="card-name-input" type="text" id="card-name" placeholder="e.g. 2018 Prizm Luka Base" oninput="calc()">
+      </div>
+
+      <div class="section">
+        <div class="section-label">Pop report & comps</div>
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-row-label">Gem rate</span>
+            <div class="input-row-right">
+              <input type="number" id="gem-rate" value="65" min="0" max="100" step="1" inputmode="decimal" oninput="calc()">
+              <span class="unit">%</span>
+            </div>
+          </div>
+          <div class="input-row">
+            <span class="input-row-label">PSA 10 price</span>
+            <div class="input-row-right">
+              <span class="unit">$</span>
+              <input type="number" id="psa10" value="120" min="0" step="1" inputmode="decimal" oninput="calc()">
+            </div>
+          </div>
+          <div class="input-row">
+            <span class="input-row-label">PSA 9 price</span>
+            <div class="input-row-right">
+              <span class="unit">$</span>
+              <input type="number" id="psa9" value="45" min="0" step="1" inputmode="decimal" oninput="calc()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Costs</div>
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-row-label">Raw card cost</span>
+            <div class="input-row-right">
+              <span class="unit">$</span>
+              <input type="number" id="card-cost" value="30" min="0" step="1" inputmode="decimal" oninput="calc()">
+            </div>
+          </div>
+          <div class="input-row">
+            <span class="input-row-label">Grading fee</span>
+            <div class="input-row-right">
+              <span class="unit">$</span>
+              <input type="number" id="grade-fee" value="25" min="0" step="1" inputmode="decimal" oninput="calc()">
+            </div>
+          </div>
+          <div class="input-row">
+            <span class="input-row-label">Platform fees</span>
+            <div class="input-row-right">
+              <input type="number" id="platform-fee" value="13" min="0" max="100" step="1" inputmode="decimal" oninput="calc()">
+              <span class="unit">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slider-section">
+        <div class="slider-header">
+          <span class="slider-label">Min profit target</span>
+          <span class="slider-value" id="threshold-out">$20</span>
+        </div>
+        <input type="range" id="threshold" min="0" max="100" value="20" step="1" oninput="onSlider()">
+        <div class="slider-ticks">
+          <span class="slider-tick">$0</span>
+          <span class="slider-tick" id="slider-max-label">$100</span>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric">
+          <div class="metric-label">Expected value</div>
+          <div class="metric-value" id="ev-out">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Total cost</div>
+          <div class="metric-value" id="cost-out">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">B/E gem %</div>
+          <div class="metric-value" id="be-out">—</div>
+        </div>
+      </div>
+
+      <div class="verdict green" id="verdict">
+        <div class="verdict-dot"></div>
+        <div>
+          <div class="verdict-title" id="verdict-title">—</div>
+          <div class="verdict-detail" id="verdict-detail">—</div>
+        </div>
+      </div>
+
+      <div class="formula-bar">
+        <div class="formula-label">Formula</div>
+        <div class="formula-text" id="formula-text">—</div>
+      </div>
+
+      <button class="save-btn" id="save-btn" onclick="saveCard()">Save to history</button>
+
+    </div>
+
+    <!-- HISTORY SCREEN -->
+    <div class="screen hidden" id="screen-history">
+      <div class="history-header">
+        <span class="history-title">Recent cards</span>
+        <button class="history-clear" onclick="clearHistory()">Clear all</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+  </div>
+
+  <div class="tabbar">
+    <button class="tab-btn active" id="tab-calc" onclick="switchTab('calc')">
+      <div class="tab-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M7 8h8M7 11h5M7 14h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="tab-label">Calculator</span>
+    </button>
+    <button class="tab-btn" id="tab-history" onclick="switchTab('history')">
+      <div class="tab-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M7 8h8M7 12h6M7 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="tab-label">History</span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+let sliderMax = 100;
+let expandedId = null;
+
+function switchTab(tab) {
+  document.getElementById('screen-calc').classList.toggle('hidden', tab !== 'calc');
+  document.getElementById('screen-history').classList.toggle('hidden', tab !== 'history');
+  document.getElementById('tab-calc').classList.toggle('active', tab === 'calc');
+  document.getElementById('tab-history').classList.toggle('active', tab !== 'calc');
+  if (tab === 'history') renderHistory();
+}
+
+function getVals() {
+  return {
+    name: document.getElementById('card-name').value.trim(),
+    gemRate: parseFloat(document.getElementById('gem-rate').value) / 100 || 0,
+    p10: parseFloat(document.getElementById('psa10').value) || 0,
+    p9: parseFloat(document.getElementById('psa9').value) || 0,
+    cardCost: parseFloat(document.getElementById('card-cost').value) || 0,
+    gradeFee: parseFloat(document.getElementById('grade-fee').value) || 0,
+    platformPct: parseFloat(document.getElementById('platform-fee').value) / 100 || 0,
+    threshold: parseFloat(document.getElementById('threshold').value) || 0,
+  };
+}
+
+function onSlider() {
+  const v = document.getElementById('threshold').value;
+  document.getElementById('threshold-out').textContent = '$' + v;
+  calc();
+}
+
+function calc() {
+  const v = getVals();
+  const adj10 = v.p10 * (1 - v.platformPct);
+  const adj9 = v.p9 * (1 - v.platformPct);
+  const ev = (v.gemRate * adj10) + ((1 - v.gemRate) * adj9);
+  const totalCost = v.cardCost + v.gradeFee;
+  const profit = ev - totalCost;
+
+  // update slider max dynamically based on EV
+  const newMax = Math.max(Math.ceil(ev / 10) * 10, 20);
+  if (newMax !== sliderMax) {
+    sliderMax = newMax;
+    const slider = document.getElementById('threshold');
+    const currentVal = parseFloat(slider.value);
+    slider.max = sliderMax;
+    if (currentVal > sliderMax) { slider.value = sliderMax; }
+    document.getElementById('slider-max-label').textContent = '$' + sliderMax;
+  }
+
+  const threshold = parseFloat(document.getElementById('threshold').value) || 0;
+  document.getElementById('threshold-out').textContent = '$' + threshold;
+
+  // break even gem rate
+  const adj10net = adj10 - totalCost;
+  const adj9net = adj9 - totalCost;
+  let beText = '—';
+  if (adj10net !== adj9net) {
+    const be = (threshold - adj9net) / (adj10net - adj9net);
+    if (be <= 0) beText = 'Any';
+    else if (be > 1) beText = 'N/A';
+    else beText = Math.round(be * 100) + '%';
+  }
+
+  document.getElementById('ev-out').textContent = '$' + ev.toFixed(2);
+  document.getElementById('cost-out').textContent = '$' + totalCost.toFixed(2);
+  document.getElementById('be-out').textContent = beText;
+
+  const vEl = document.getElementById('verdict');
+  const vTitle = document.getElementById('verdict-title');
+  const vDetail = document.getElementById('verdict-detail');
+  vEl.className = 'verdict';
+
+  if (profit >= threshold) {
+    vEl.classList.add('green');
+    vTitle.textContent = 'Send it';
+    vDetail.textContent = '+$' + profit.toFixed(2) + ' expected — clears $' + threshold + ' target by $' + (profit - threshold).toFixed(2);
+  } else if (profit > 0) {
+    vEl.classList.add('yellow');
+    vTitle.textContent = 'Below your target';
+    vDetail.textContent = 'Profitable at +$' + profit.toFixed(2) + ' but $' + (threshold - profit).toFixed(2) + ' short of $' + threshold + ' goal';
+  } else {
+    vEl.classList.add('red');
+    vTitle.textContent = 'Pass';
+    vDetail.textContent = 'Expected loss of $' + Math.abs(profit).toFixed(2) + ' after all fees';
+  }
+
+  const gemPct = Math.round(v.gemRate * 100);
+  const nonGemPct = 100 - gemPct;
+  document.getElementById('formula-text').innerHTML =
+    `EV = (<span class="hi">${gemPct}%</span> × $${adj10.toFixed(2)}) + (<span class="hi">${nonGemPct}%</span> × $${adj9.toFixed(2)}) = <span class="hi">$${ev.toFixed(2)}</span><br>` +
+    `Profit = $${ev.toFixed(2)} − $${totalCost.toFixed(2)} = <span class="hi">${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}</span>`;
+
+  const saveBtn = document.getElementById('save-btn');
+  saveBtn.classList.toggle('ready', profit > 0);
+}
+
+function saveCard() {
+  const v = getVals();
+  const adj10 = v.p10 * (1 - v.platformPct);
+  const adj9 = v.p9 * (1 - v.platformPct);
+  const ev = (v.gemRate * adj10) + ((1 - v.gemRate) * adj9);
+  const totalCost = v.cardCost + v.gradeFee;
+  const profit = ev - totalCost;
+  const threshold = v.threshold;
+
+  let verdict;
+  if (profit >= threshold) verdict = 'send';
+  else if (profit > 0) verdict = 'maybe';
+  else verdict = 'pass';
+
+  const entry = {
+    id: Date.now(),
+    name: v.name || 'Unnamed card',
+    gemRate: Math.round(v.gemRate * 100),
+    p10: v.p10,
+    p9: v.p9,
+    cardCost: v.cardCost,
+    gradeFee: v.gradeFee,
+    platformFee: Math.round(v.platformPct * 100),
+    threshold: threshold,
+    ev: ev,
+    profit: profit,
+    verdict: verdict,
+    ts: new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  };
+
+  const history = getHistory();
+  history.unshift(entry);
+  if (history.length > 50) history.pop();
+  localStorage.setItem('card-ev-history', JSON.stringify(history));
+
+  const btn = document.getElementById('save-btn');
+  btn.textContent = 'Saved!';
+  setTimeout(() => { btn.textContent = 'Save to history'; }, 1500);
+}
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('card-ev-history')) || []; }
+  catch { return []; }
+}
+
+function clearHistory() {
+  if (confirm('Clear all saved cards?')) {
+    localStorage.removeItem('card-ev-history');
+    renderHistory();
+  }
+}
+
+function loadIntoCalc(entry) {
+  document.getElementById('card-name').value = entry.name;
+  document.getElementById('gem-rate').value = entry.gemRate;
+  document.getElementById('psa10').value = entry.p10;
+  document.getElementById('psa9').value = entry.p9;
+  document.getElementById('card-cost').value = entry.cardCost;
+  document.getElementById('grade-fee').value = entry.gradeFee;
+  document.getElementById('platform-fee').value = entry.platformFee;
+  document.getElementById('threshold').value = entry.threshold;
+  calc();
+  switchTab('calc');
+}
+
+function toggleExpand(id) {
+  if (expandedId === id) { expandedId = null; }
+  else { expandedId = id; }
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = getHistory();
+  const list = document.getElementById('history-list');
+
+  if (history.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="4" y="4" width="16" height="16" rx="3" stroke="#555" stroke-width="1.5"/>
+            <path d="M8 9h8M8 13h5M8 17h3" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="empty-title">No cards saved yet</div>
+        <div class="empty-sub">Run a calculation and tap<br>"Save to history" to log it here</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = history.map(entry => {
+    const profitClass = entry.profit >= entry.threshold ? 'pos' : entry.profit > 0 ? 'neutral' : 'neg';
+    const profitStr = (entry.profit >= 0 ? '+' : '') + '$' + entry.profit.toFixed(2);
+    const verdictLabel = entry.verdict === 'send' ? 'Send it' : entry.verdict === 'maybe' ? 'Below target' : 'Pass';
+    const isExpanded = expandedId === entry.id;
+
+    const expanded = isExpanded ? `
+      <div class="history-expanded open">
+        <div class="expanded-grid">
+          <div class="expanded-stat"><div class="expanded-stat-label">Gem rate</div><div class="expanded-stat-value">${entry.gemRate}%</div></div>
+          <div class="expanded-stat"><div class="expanded-stat-label">PSA 10</div><div class="expanded-stat-value">$${entry.p10}</div></div>
+          <div class="expanded-stat"><div class="expanded-stat-label">PSA 9</div><div class="expanded-stat-value">$${entry.p9}</div></div>
+          <div class="expanded-stat"><div class="expanded-stat-label">Raw cost</div><div class="expanded-stat-value">$${entry.cardCost}</div></div>
+          <div class="expanded-stat"><div class="expanded-stat-label">Grade fee</div><div class="expanded-stat-value">$${entry.gradeFee}</div></div>
+          <div class="expanded-stat"><div class="expanded-stat-label">Expected EV</div><div class="expanded-stat-value">$${entry.ev.toFixed(2)}</div></div>
+        </div>
+        <button class="load-btn accent" onclick="event.stopPropagation(); loadIntoCalc(${JSON.stringify(entry).replace(/"/g,'&quot;')})">Load into calculator &rarr;</button>
+      </div>` : `<div class="history-expanded"></div>`;
+
+    return `
+      <div class="history-item" onclick="toggleExpand(${entry.id})">
+        <div class="history-item-top">
+          <div class="history-item-left">
+            <div class="history-item-name">${entry.name}</div>
+            <div class="history-item-meta">Gem ${entry.gemRate}% · Cost $${entry.cardCost} · Fee $${entry.gradeFee} · ${entry.ts}</div>
+          </div>
+          <div class="history-item-right">
+            <div class="history-profit ${profitClass}">${profitStr}</div>
+            <div class="history-verdict-badge ${entry.verdict}">${verdictLabel}</div>
+          </div>
+        </div>
+        ${expanded}
+      </div>`;
+  }).join('');
+}
+
+calc();
+</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js");}</script>
+</body>
+</html>
