@@ -73,6 +73,7 @@ input[type="text"],input[type="number"]{
 input[type="text"]{width:100%;}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;}
 input[type="number"]:focus{color:var(--accent);}
+  
 
 /* card name */
 .card-name-wrap{margin:14px 16px 0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;}
@@ -328,6 +329,11 @@ input[type="range"]::-moz-range-thumb{
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input[type="number"]').forEach(el => {
+    el.addEventListener('focus', () => el.select());
+  });
+});  
 let sliderMax = 100;
 let expandedId = null;
 
