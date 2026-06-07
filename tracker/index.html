@@ -126,8 +126,8 @@ html, body {
 }
 
 /* Secondary screens start off-screen to the right */
-#screen-add-card,
-#screen-search {
+#screen-add-card:not(.is-active),
+#screen-search:not(.is-active) {
   transform: translateX(100%);
   z-index: 2;
 }
