@@ -588,6 +588,8 @@ function pushScreen(id) {
   dashboard.classList.add('is-pushed');
   target.classList.add('is-active');
   activeScreen = id;
+
+  history.pushState({ screen: id }, '');
 }
 
 function popScreen() {
@@ -601,17 +603,10 @@ function popScreen() {
   activeScreen = null;
 }
 
-// Handle Android back gesture / browser back button
+// Handle browser back button / Android back gesture
 window.addEventListener('popstate', () => {
   if (activeScreen) popScreen();
 });
-
-// Push a history entry when navigating so back button works
-const originalPush = pushScreen;
-window.pushScreen = function(id) {
-  history.pushState({ screen: id }, '');
-  originalPush(id);
-};
 
 // ============================================================
 // DASHBOARD DATA
