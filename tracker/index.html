@@ -578,6 +578,7 @@ html, body {
 let activeScreen = null;
 
 function pushScreen(id) {
+  console.log('pushScreen called with', id);
   const target = document.getElementById(id);
   const dashboard = document.getElementById('screen-dashboard');
 
