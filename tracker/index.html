@@ -103,42 +103,40 @@ html, body {
   flex: 1;
   position: relative;
   overflow: hidden;
+  height: 100%;
 }
 
 .screen {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: var(--bg);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-
-  /* Push/pop transition */
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
+  transition: transform 0.28s ease;
 }
 
-/* Dashboard is always the base layer */
 #screen-dashboard {
   transform: translateX(0);
   z-index: 1;
 }
 
-/* Secondary screens start off-screen to the right */
-#screen-add-card:not(.is-active),
-#screen-search:not(.is-active) {
+#screen-add-card,
+#screen-search {
   transform: translateX(100%);
   z-index: 2;
 }
 
-/* When pushed into view */
-.screen.is-active {
+#screen-add-card.is-active,
+#screen-search.is-active {
   transform: translateX(0);
 }
 
-/* Dashboard pushed back when secondary screen is active */
-.screen.is-pushed {
+#screen-dashboard.is-pushed {
   transform: translateX(-30%);
 }
 
